@@ -8,5 +8,14 @@ class Place {
   final String id;
   final String title;
   final File image;
-  Place({required this.title, required this.image}) : id = uuid.v4();
+  final PlaceLocation location;
+  Place({required this.location, required this.title, required this.image})
+      : id = uuid.v4();
+}
+
+class PlaceLocation {
+  final double lat;
+  final double lng;
+  final String address;
+  PlaceLocation({required this.lat, required this.lng, required this.address});
 }
