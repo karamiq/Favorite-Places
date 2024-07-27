@@ -1,7 +1,6 @@
 import 'package:favorite_places/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class MapScreen extends StatefulWidget {
   MapScreen({super.key, PlaceLocation? location, this.isSelecting = true})
@@ -16,20 +15,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  void initState() {
-    super.initState();
-    _requestPermissions();
-  }
-
-  Future<void> _requestPermissions() async {
-    final status = await Permission.location.request();
-    if (status.isGranted) {
-      print('object');
-    } else {
-      throw Exception();
-    }
-  }
-
+  LatLng? pickedLocation;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,15 +25,27 @@ class _MapScreenState extends State<MapScreen> {
             : widget.location.address),
         actions: [
           if (widget.isSelecting)
-            IconButton(onPressed: () {}, icon: const Icon(Icons.save))
+            IconButton(
+                onPressed: () => Navigator.pop<LatLng>(context, pickedLocation),
+                icon: const Icon(Icons.save))
         ],
       ),
       body: GoogleMap(
+        onTap: (pos) =>
+            !widget.isSelecting ? null : setState(() => pickedLocation = pos),
+        mapType: MapType.satellite,
         initialCameraPosition: CameraPosition(
           target: LatLng(widget.location.lat, widget.location.lng),
           zoom: 16,
         ),
-        markers: const {},
+        markers: (pickedLocation == null && widget.isSelecting)
+            ? {}
+            : {
+                Marker(
+                    markerId: const MarkerId('marker'),
+                    position: pickedLocation ??
+                        LatLng(widget.location.lat, widget.location.lng)),
+              },
       ),
     );
   }
